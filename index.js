@@ -2,6 +2,8 @@
 
 const ytdl = require('ytdl-core');
 const ffmpeg = require('fluent-ffmpeg');
+const fs = require('fs');
+const path = require('path');
 
 // Parse argv TODO: finetune
 const argv = process.argv.splice(2);
@@ -39,6 +41,12 @@ const stuff = async (url, interval) => {
     // choose format TODO: format needs to be smarter
     const format = ytdl.chooseFormat(videoInfo.formats, { quality: '137' });
 
+    // Create folder if not exists
+    const framesFolder = path.join(__dirname, "frames");
+    if (!fs.existsSync(framesFolder)) {
+        fs.mkdirSync(framesFolder);
+    }
+
     // Create screenshots
     ffmpeg(format.url)
         .on('error', (err) => { 
@@ -54,7 +62,7 @@ const stuff = async (url, interval) => {
             process.exit(); 
         })
         .screenshots({ 
-            folder: './frames', 
+            folder: framesFolder, 
             filename: videoInfo.title + '_%0i.png', 
             timestamps: framePlan,
         });
